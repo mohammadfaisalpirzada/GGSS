@@ -78,7 +78,7 @@ const StudentForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch('/api/save-student-data', {
         method: 'POST',
@@ -87,21 +87,23 @@ const StudentForm = () => {
         },
         body: JSON.stringify({
           ...formData,
-          grNumber: Number(formData.grNumber),
+          grNumber: Number(formData.grNumber),  // Ensure GR number is a number
         }),
       });
-
+  
       if (!response.ok) {
+        // Parse the error response
         const errorData = await response.json();
         throw new Error(errorData.message || 'Unknown error occurred');
       }
-
+  
       const responseData = await response.json();
       alert(`Data saved successfully! GR#: ${responseData.data.grNumber}`);
-
+  
       // Reset the form after successful submission
       setFormData(initialFormData);
     } catch (error: unknown) {
+      // Handle and display errors if any occur during form submission
       if (error instanceof Error) {
         alert(`Error occurred while submitting the form: ${error.message}`);
       } else {
