@@ -1,4 +1,3 @@
-import Image from "next/image";
 import StudentForm from "./student-form/page";
 
 export default function Home() {

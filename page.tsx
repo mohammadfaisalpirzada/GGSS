@@ -4,20 +4,20 @@ import React, { useState } from 'react';
 
 const StudentForm = () => {
   const initialFormData = {
-    grNumber: '234',  // GR# as number input
+    grNumber: '234', // GR# as number input
     studentName: 'gdfg',
     fathersName: 'dfgsd',
     gender: 'Female',
-    religion: 'Islam',  // Default to Islam
-    contactNumber: '563456347',  // Number input for Contact Number
-    cnicBForm: '42101-1234456-9',  // String input for CNIC
+    religion: 'Islam', // Default to Islam
+    contactNumber: '563456347', // Number input for Contact Number
+    cnicBForm: '42101-1234456-9', // String input for CNIC
     dateOfBirth: '15/05/2002',
     fatherMotherCnic: '42101-1234456-9',
     guardianName: 'sdfasdfsd',
     guardianCnic: '42101-1234456-9',
     guardianRelation: 'Grandchild',
-    studentClass: 'ECE',  // Default to ECE
-    classSection: 'Girls',  // Default to Boys
+    studentClass: 'ECE', // Default to ECE
+    classSection: 'Girls', // Default to Boys
     dateOfAdmission: '2024-11-07',
   };
 
@@ -57,9 +57,9 @@ const StudentForm = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           ...formData,
-          grNumber: Number(formData.grNumber),  // Convert numeric fields to numbers
+          grNumber: Number(formData.grNumber),
           contactNumber: Number(formData.contactNumber),
         }),
       });
@@ -75,7 +75,11 @@ const StudentForm = () => {
       // Reset form fields after successful submission
       setFormData(initialFormData);
     } catch (error) {
-      alert(`Error occurred while submitting the form: ${error.message}`);
+      if (error instanceof Error) {
+        alert(`Error occurred while submitting the form: ${error.message}`);
+      } else {
+        alert('An unexpected error occurred.');
+      }
     }
   };
 
@@ -84,7 +88,6 @@ const StudentForm = () => {
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
         <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">G.G.S.S Nishtar Road Students Data Form!</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
-          
           {/* GR# Field */}
           <div className="flex flex-col">
             <label className="font-semibold text-black">GR#:</label>

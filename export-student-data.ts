@@ -1,18 +1,22 @@
+// /pages/api/export-student-data.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import mongoose from 'mongoose';
-import Student from '@/models/Student'; // Adjust the path based on your project structure
+import Student from '@/models/Student'; // Ensure this path is correct
 import { utils, write } from 'xlsx';
 
 // MongoDB connection string
-const MONGO_URI = 'mongodb+srv://mohammadfaisalpirzada:shazz4001@cluster0.6uyke.mongodb.net/';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://mohammadfaisalpirzada:shazz4001@cluster0.6uyke.mongodb.net/';
 
 // Connect to MongoDB
 async function connectToDatabase() {
   if (mongoose.connection.readyState >= 1) return; // Already connected
-  await mongoose.connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  try {
+    await mongoose.connect(MONGO_URI); // No need for options in Mongoose 6.x and above
+    console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    throw new Error('Failed to connect to MongoDB');
+  }
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -23,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch all student data
     const students = await Student.find({});
 
-    // Prepare data for Excel
+    // Prepare data for Excel export
     const worksheetData = students.map((student) => ({
       'GR#': student.grNumber,
       'Student Name': student.studentName,
@@ -42,21 +46,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'Date of Admission': student.dateOfAdmission,
     }));
 
-    // Create a new workbook and add the worksheet
+    // Create Excel workbook and worksheet
     const worksheet = utils.json_to_sheet(worksheetData);
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, worksheet, 'Students');
 
-    // Generate Excel file
+    // Generate the Excel file as a buffer
     const excelBuffer = write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
-    // Set headers to download the file
+    // Set headers to prompt download
     res.setHeader('Content-Disposition', 'attachment; filename="students_data.xlsx"');
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
-    // Send the generated Excel file
+    // Send the buffer containing the Excel file
     res.status(200).send(excelBuffer);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error exporting data to Excel:', error);
     res.status(500).json({ message: 'Error exporting data to Excel.' });
   }
