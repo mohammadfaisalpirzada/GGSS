@@ -1,4 +1,0 @@
-{
-  "grNumber": "4534",
-  "studentName": "fdfsdfg"
-}

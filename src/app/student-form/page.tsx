@@ -1,33 +1,61 @@
- 'use client';
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const StudentForm = () => {
+  // const initialFormData = {
+  //   grNumber: '',
+  //   studentName: '',
+  //   fathersName: '',
+  //   gender: 'Female',
+  //   religion: 'Islam',
+  //   contactNumber: '',
+  //   cnicBForm: '',
+  //   dateOfBirth: '',
+  //   fatherMotherCnic: '',
+  //   guardianName: '',
+  //   guardianCnic: '',
+  //   guardianRelation: 'Father',
+  //   studentClass: 'ECE',
+  //   classSection: 'Girls',
+  //   dateOfAdmission: '',
+  // };
+
   const initialFormData = {
-    grNumber: '',
-    studentName: '',
-    fathersName: '',
+    grNumber: '105',
+    studentName: 'Eshal',
+    fathersName: 'Muhammad Faisal Peerzada',
     gender: 'Female',
-    religion: 'Islam', // Default to Islam
-    contactNumber: '',
-    cnicBForm: '',
-    dateOfBirth: '',
-    fatherMotherCnic: '',
-    guardianName: '',
-    guardianCnic: '',
-    guardianRelation: 'Father', // Default to Father
-    studentClass: 'ECE', // Default to ECE
+    religion: 'Islam',
+    contactNumber: '03458340669',
+    cnicBForm: '4210113754684',
+    dateOfBirth: '2010-12-13',
+    fatherMotherCnic: '4210113754684',
+    guardianName: 'Asma',
+    guardianCnic: '4210113754684',
+    guardianRelation: 'Grandmother',
+    studentClass: 'IX',
     classSection: 'Girls',
-    dateOfAdmission: '',
+    dateOfAdmission: '2014-10-17',
   };
+
 
   const [formData, setFormData] = useState(initialFormData);
   const [cnicError, setCnicError] = useState('');
 
+  // Pre-fill Guardian's name and CNIC based on father's info
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      guardianName: prevFormData.fathersName,
+      guardianCnic: prevFormData.fatherMotherCnic,
+    }));
+  }, [formData.fathersName, formData.fatherMotherCnic]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
-    // Only allow numbers for numeric fields
+    // Allow only digits for GR# and contact number
     if ((name === 'grNumber' || name === 'contactNumber') && !/^\d*$/.test(value)) {
       return;
     }
@@ -38,6 +66,7 @@ const StudentForm = () => {
   const handleCnicBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
+    // CNIC formatting
     if (value.length === 13) {
       const formattedCnic = `${value.slice(0, 5)}-${value.slice(5, 12)}-${value.slice(12)}`;
       setFormData({ ...formData, [name]: formattedCnic });
@@ -59,7 +88,6 @@ const StudentForm = () => {
         body: JSON.stringify({
           ...formData,
           grNumber: Number(formData.grNumber),
-          contactNumber: Number(formData.contactNumber),
         }),
       });
 
@@ -71,12 +99,13 @@ const StudentForm = () => {
       const responseData = await response.json();
       alert(`Data saved successfully! GR#: ${responseData.data.grNumber}`);
 
+      // Reset the form after successful submission
       setFormData(initialFormData);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         alert(`Error occurred while submitting the form: ${error.message}`);
       } else {
-        alert('An unexpected error occurred.');
+        alert('An unknown error occurred.');
       }
     }
   };
@@ -84,9 +113,8 @@ const StudentForm = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">Student Data Form</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">Student Form</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* GR# Field */}
           <div className="flex flex-col">
             <label className="font-semibold text-black">GR#:</label>
             <input
@@ -99,10 +127,20 @@ const StudentForm = () => {
             />
           </div>
 
-
-
-
           {/* Student Name Field */}
+          <div className="flex flex-col">
+            <label className="font-semibold text-black">Student Name:</label>
+            <input
+              type="text"
+              name="studentName"
+              value={formData.studentName}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 rounded-md text-black"
+              required
+            />
+          </div>
+
+                  {/* Student Name Field */}
           <div className="flex flex-col">
             <label className="font-semibold text-black">Student Name:</label>
             <input
@@ -156,6 +194,7 @@ const StudentForm = () => {
               <option value="Islam">Islam</option>
               <option value="Christianity">Christianity</option>
               <option value="Hinduism">Hinduism</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
@@ -222,7 +261,7 @@ const StudentForm = () => {
             <input
               type="text"
               name="guardianName"
-              value={formData.guardianName}  // Will be pre-filled with Father's Name
+              value={formData.guardianName}  // Pre-filled with Father's Name
               onChange={handleChange}  // Allow user to modify it if needed
               className="border border-gray-300 p-2 rounded-md text-black"
               required
@@ -235,7 +274,7 @@ const StudentForm = () => {
             <input
               type="text"
               name="guardianCnic"
-              value={formData.guardianCnic}  // Will be pre-filled with Father's CNIC
+              value={formData.guardianCnic}  // Pre-filled with Father's CNIC
               onChange={handleChange}  // Allow user to modify it if needed
               onBlur={handleCnicBlur}
               className="border border-gray-300 p-2 rounded-md text-black"
